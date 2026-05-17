@@ -28,7 +28,7 @@ async function startServer() {
 
       const truncatedCode = codeSnippet.substring(0, 15000);
       const ai = getGenAI();
-      const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = ai.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
 
       const prompt = `Analise este trecho de código de um notebook do Google Colab e forneça metadados para organização em uma "Gaveta Digital". 
       Retorne um JSON com os campos: name, description, category, tags.
@@ -75,7 +75,7 @@ async function startServer() {
       if (!notebooks || !Array.isArray(notebooks)) return res.status(400).json({ error: "Notebooks array is required" });
 
       const ai = getGenAI();
-      const model = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
+      const model = ai.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
 
       const prompt = `Você é um arquivista mestre. O usuário bagunçou as categorias dos notebooks dele.
       Analise a lista abaixo e sugira uma nova estrutura de categorias (Gavetas) que seja limpa, profissional e intuitiva.
