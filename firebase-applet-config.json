@@ -1,10 +1,9 @@
 {
-  "projectId": "gen-lang-client-0798765279",
-  "appId": "1:205003584229:web:d409a1d29a06579f5cda0c",
-  "apiKey": "AIzaSyDit5_D_FAmoW8r6FtOC4ujaGgjpCZbUS8",
-  "authDomain": "gen-lang-client-0798765279.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-9487db98-bac4-40b9-a44c-c3e283b4edb1",
-  "storageBucket": "gen-lang-client-0798765279.firebasestorage.app",
-  "messagingSenderId": "205003584229",
-  "measurementId": ""
+  "apiKey": "AIzaSyBehFtQlJgMn9ezUYGWIPolrvb20mT5brU",
+  "authDomain": "arquivista-digital.firebaseapp.com",
+  "databaseURL": "https://arquivista-digital-default-rtdb.firebaseio.com",
+  "projectId": "arquivista-digital",
+  "storageBucket": "arquivista-digital.firebasestorage.app",
+  "messagingSenderId": "626037347789",
+  "appId": "1:626037347789:web:80650f22c46e2ad817a084"
 }
