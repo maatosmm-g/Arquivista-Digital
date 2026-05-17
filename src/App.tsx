@@ -30,6 +30,8 @@ function Dashboard() {
     setTimeout(() => setShowShareTooltip(false), 3000);
   };
 
+  const [firebaseError, setFirebaseError] = useState<string | null>(null);
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (u) => {
       setUser(u);
@@ -46,18 +48,20 @@ function Dashboard() {
             photoURL: u.photoURL,
             lastLoginAt: serverTimestamp(),
             createdAt: serverTimestamp(),
-          }, { merge: true }).catch(async (err) => {
-            if (err.message?.includes('permissions')) {
-              await setDoc(userRef, {
-                displayName: u.displayName,
-                photoURL: u.photoURL,
-                lastLoginAt: serverTimestamp(),
-              }, { merge: true });
-            }
-          });
-        } catch (err) {
+          }, { merge: true });
+        } catch (err: any) {
           console.error("Erro ao sincronizar perfil do usuário:", err);
+          if (err.message?.includes('apiKey') || err.message?.includes('valid-api-key')) {
+            setFirebaseError("A Chave de API do seu Firebase parece ser inválida. Verifique o arquivo firebase-applet-config.json e as configurações no Console do Firebase.");
+          }
         }
+      }
+    }, (error: any) => {
+      console.error("Erro no Auth:", error);
+      if (error.message?.includes('apiKey') || error.message?.includes('api-key-not-valid')) {
+        setFirebaseError("Erro de Configuração: Sua API Key do Firebase não é válida para este projeto. Verifique se o API Key no firebase-applet-config.json pertence ao projeto correto e se não possui restrições de IP/Referrer no Google Cloud Console.");
+      } else if (error.message?.includes('unauthorized-domain')) {
+        setFirebaseError("Domínio Não Autorizado: Você precisa adicionar este domínio (ais-dev-...) na lista de domínios autorizados do Firebase Console -> Authentication -> Settings.");
       }
     });
     return unsubscribe;
@@ -160,6 +164,20 @@ function Dashboard() {
 
   return (
     <Layout user={user}>
+      {firebaseError && (
+        <div className="max-w-7xl mx-auto px-8 pt-8">
+          <div className="bg-red-50 border border-red-200 text-red-800 px-6 py-4 rounded-sm flex items-center gap-4">
+            <div className="bg-red-800 text-white p-2 rounded-full">
+              <ArchiveIcon size={16} />
+            </div>
+            <div>
+              <p className="font-bold text-sm uppercase tracking-widest">Atenção Arquivista</p>
+              <p className="text-sm opacity-80">{firebaseError}</p>
+              <p className="text-[10px] mt-1 opacity-60">Se você está no Netlify ou GitHub, verifique se as chaves foram exportadas corretamente no firebase-applet-config.json.</p>
+            </div>
+          </div>
+        </div>
+      )}
       {!user ? (
         <section className="max-w-4xl mx-auto py-24 px-8 text-center bg-[#F5F5F0]">
           <motion.div 

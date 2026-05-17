@@ -4,15 +4,17 @@
   "type": "module",
   "description": "Organize seus notebooks do Google Colab do Google Drive com a ajuda do Gemini AI. Uma gaveta digital inteligente e elegante para seus códigos.",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
+    "dev": "tsx server.ts",
+    "build": "vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs",
+    "start": "node dist/server.cjs",
     "lint": "eslint ."
   },
   "dependencies": {
     "@google/genai": "^1.29.0",
     "@typescript-eslint/eslint-plugin": "^8.59.2",
     "@typescript-eslint/parser": "^8.59.2",
+    "esbuild": "^0.28.0",
+    "express": "^5.2.1",
     "firebase": "^11.3.1",
     "lucide-react": "^0.546.0",
     "motion": "^12.23.24",
@@ -20,6 +22,7 @@
     "react": "^19.0.1",
     "react-dom": "^19.0.1",
     "react-router-dom": "^7.15.0",
+    "tsx": "^4.22.1",
     "typescript-eslint": "^8.59.2"
   },
   "devDependencies": {

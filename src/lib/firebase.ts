@@ -3,8 +3,29 @@ import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore, doc, getDocFromServer } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
-const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+// Utility to debug config
+const isConfigValid = (config: any) => {
+  return config && config.apiKey && !config.apiKey.includes('AQUI') && config.apiKey !== 'INVALID';
+};
+
+let app;
+
+if (isConfigValid(firebaseConfig)) {
+  try {
+    app = initializeApp(firebaseConfig);
+    console.log('[Firebase] Initialized with project:', firebaseConfig.projectId);
+  } catch (error) {
+    console.error('[Firebase] Initialization error:', error);
+    // If it fails here, we still need an app object for getAuth/getFirestore to not crash
+    app = initializeApp({ apiKey: "INVALID_FALLBACK", projectId: "INVALID_FALLBACK" });
+  }
+} else {
+  console.warn('[Firebase] Configuration missing or invalid in firebase-applet-config.json');
+  // Initialize with dummy to prevent crash, but handle the error state in UI
+  app = initializeApp({ apiKey: "MISSING_KEY", projectId: "MISSING_PROJECT" });
+}
+
+export const db = getFirestore(app);
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 
@@ -18,7 +39,7 @@ export async function testConnection() {
   }
 }
 
-testConnection();
+// testConnection(); // Removido para evitar erro imediato no carregamento
 
 export enum OperationType {
   CREATE = 'create',

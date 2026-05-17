@@ -2,5 +2,7 @@
   "name": "Gaveta Digital: Seu Arquivista Pessoal",
   "description": "Organize seus notebooks do Google Colab do Google Drive com a ajuda do Gemini AI. Uma gaveta digital inteligente e elegante para seus códigos.",
   "requestFramePermissions": [],
-  "majorCapabilities": []
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }
