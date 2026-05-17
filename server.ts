@@ -1,15 +1,15 @@
 import express from "express";
 import path from "path";
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenerativeAI, SchemaType } from "@google/generative-ai";
 
-let genAI: GoogleGenAI | null = null;
+let genAI: GoogleGenerativeAI | null = null;
 function getGenAI() {
   if (!genAI) {
     const key = process.env.GEMINI_API_KEY;
     if (!key) {
       throw new Error("GEMINI_API_KEY environment variable is required");
     }
-    genAI = new GoogleGenAI(key);
+    genAI = new GoogleGenerativeAI(key);
   }
   return genAI;
 }
@@ -41,12 +41,12 @@ async function startServer() {
         generationConfig: {
           responseMimeType: "application/json",
           responseSchema: {
-            type: Type.OBJECT,
+            type: SchemaType.OBJECT,
             properties: {
-              name: { type: Type.STRING, description: "Nome curto e claro para o notebook" },
-              description: { type: Type.STRING, description: "Descrição do que o código faz" },
-              category: { type: Type.STRING, description: "Categoria principal (ex: Machine Learning, Data Viz, Automação)" },
-              tags: { type: Type.ARRAY, items: { type: Type.STRING }, description: "Tags relevantes" }
+              name: { type: SchemaType.STRING, description: "Nome curto e claro para o notebook" },
+              description: { type: SchemaType.STRING, description: "Descrição do que o código faz" },
+              category: { type: SchemaType.STRING, description: "Categoria principal (ex: Machine Learning, Data Viz, Automação)" },
+              tags: { type: SchemaType.ARRAY, items: { type: SchemaType.STRING }, description: "Tags relevantes" }
             },
             required: ["name", "description", "category", "tags"]
           }
@@ -55,13 +55,13 @@ async function startServer() {
 
       const response = await result.response;
       res.json(JSON.parse(response.text()));
-    } catch (error) {
+    } catch (error: any) {
       console.error("Gemini Analysis Error:", error);
       res.status(500).json({ 
-        error: "Failed to analyze notebook",
+        error: error.message || "Failed to analyze notebook",
         fallback: {
           name: "Notebook sem nome",
-          description: "Não foi possível analisar o código automaticamente.",
+          description: "Não foi possível analisar o código automaticamente (Erro API).",
           category: "Geral",
           tags: []
         }
@@ -93,13 +93,13 @@ async function startServer() {
         generationConfig: {
           responseMimeType: "application/json",
           responseSchema: {
-            type: Type.ARRAY,
+            type: SchemaType.ARRAY,
             items: {
-              type: Type.OBJECT,
+              type: SchemaType.OBJECT,
               properties: {
-                notebookId: { type: Type.STRING },
-                category: { type: Type.STRING },
-                name: { type: Type.STRING }
+                notebookId: { type: SchemaType.STRING },
+                category: { type: SchemaType.STRING },
+                name: { type: SchemaType.STRING }
               },
               required: ["notebookId", "category", "name"]
             }
