@@ -1,0 +1,83 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Validation Helpers ---
+
+    function isValidUser(data) {
+      return data.uid == request.auth.uid
+        && data.email is string && data.email.size() <= 256
+        && (data.displayName == null || (data.displayName is string && data.displayName.size() <= 256))
+        && (data.photoURL == null || (data.photoURL is string && data.photoURL.size() <= 1024));
+    }
+
+    function isValidNotebook(data) {
+      return data.userId == request.auth.uid
+        && data.name is string && data.name.size() <= 512
+        && data.driveUrl is string && data.driveUrl.size() <= 2048
+        && (data.description == null || (data.description is string && data.description.size() <= 10000))
+        && (data.category == null || (data.category is string && data.category.size() <= 256))
+        && (data.tags == null || (data.tags is list && data.tags.size() <= 200))
+        && (data.contentSnippet == null || (data.contentSnippet is string && data.contentSnippet.size() <= 100000))
+        && data.createdAt == (resource == null ? request.time : existing().createdAt);
+    }
+
+    // --- Collection Rules ---
+
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(incoming()) && incoming().keys().hasAll(['uid', 'email', 'createdAt']);
+      allow update: if isOwner(userId) 
+        && incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL', 'lastLoginAt']);
+    }
+
+    match /notebooks/{notebookId} {
+      allow read: if (isSignedIn() && (resource == null || resource.data.userId == request.auth.uid))
+        || (resource != null && resource.data.isPublic == true);
+      
+      allow create: if isSignedIn() 
+        && isValidNotebook(incoming())
+        && incoming().keys().hasAll(['userId', 'name', 'driveUrl', 'createdAt']);
+
+      allow update: if isSignedIn() 
+        && resource.data.userId == request.auth.uid
+        && (
+          // Allow basic updates and enrichment
+          incoming().diff(existing()).affectedKeys().hasOnly(['name', 'description', 'category', 'tags', 'contentSnippet', 'lastAnalyzed', 'driveUrl', 'isPublic', 'shareId', 'views'])
+        );
+        
+      allow delete: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+
+    match /access_logs/{logId} {
+      allow create: if true; // Public access logging
+      allow read: if isSignedIn(); // Only logged in users can see telemetry
+      allow list: if isSignedIn();
+    }
+  }
+}

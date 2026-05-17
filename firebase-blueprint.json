@@ -1,0 +1,65 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile information",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
+    },
+    "Notebook": {
+      "title": "Notebook",
+      "description": "Metadata for a Google Colab notebook",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "driveUrl": { "type": "string" },
+        "category": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "contentSnippet": { "type": "string" },
+        "isPublic": { "type": "boolean" },
+        "shareId": { "type": "string" },
+        "views": { "type": "number" },
+        "lastAnalyzed": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "name", "driveUrl"]
+    },
+    "AccessLog": {
+      "title": "Access Log",
+      "description": "Log of public accesses to shared notebooks",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "notebookId": { "type": "string" },
+        "accessedAt": { "type": "string", "format": "date-time" },
+        "userAgent": { "type": "string" },
+        "referrer": { "type": "string" }
+      },
+      "required": ["id", "notebookId", "accessedAt"]
+    }
+  },
+  "firestore": {
+    "/users": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/notebooks": {
+      "schema": "Notebook",
+      "description": "Collection of organized notebooks"
+    },
+    "/access_logs": {
+      "schema": "AccessLog",
+      "description": "Telemetry for shared links"
+    }
+  }
+}

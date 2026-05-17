@@ -1,0 +1,39 @@
+{
+  "name": "Gaveta Digital: Seu Arquivista Pessoal",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Organize seus notebooks do Google Colab do Google Drive com a ajuda do Gemini AI. Uma gaveta digital inteligente e elegante para seus códigos.",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "@google/genai": "^1.29.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.2",
+    "@typescript-eslint/parser": "^8.59.2",
+    "firebase": "^11.3.1",
+    "lucide-react": "^0.546.0",
+    "motion": "^12.23.24",
+    "nanoid": "^5.1.11",
+    "react": "^19.0.1",
+    "react-dom": "^19.0.1",
+    "react-router-dom": "^7.15.0",
+    "typescript-eslint": "^8.59.2"
+  },
+  "devDependencies": {
+    "@firebase/eslint-plugin-security-rules": "latest",
+    "@tailwindcss/vite": "^4.0.7",
+    "@types/react": "^19.0.8",
+    "@types/react-dom": "^19.0.3",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.20.0",
+    "tailwindcss": "^4.0.0",
+    "typescript": "^5.7.3",
+    "vite": "^6.1.0"
+  },
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
