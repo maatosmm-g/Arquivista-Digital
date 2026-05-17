@@ -1,55 +1,53 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-
 exports.handler = async (event) => {
-  // Só aceita POST
+  // Função de teste - retorna sempre uma resposta de sucesso
+  console.log("📢 Função foi chamada!");
+  console.log("Método:", event.httpMethod);
+  console.log("Headers:", JSON.stringify(event.headers));
+  
+  if (event.httpMethod === "OPTIONS") {
+    return {
+      statusCode: 204,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "Content-Type",
+        "Access-Control-Allow-Methods": "POST, OPTIONS"
+      }
+    };
+  }
+  
   if (event.httpMethod !== "POST") {
-    return { 
-      statusCode: 405, 
-      body: JSON.stringify({ error: "Method Not Allowed" }) 
+    return {
+      statusCode: 405,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ error: "Método não permitido. Use POST." })
     };
   }
 
   try {
-    const { action, codeSnippet, notebooks } = JSON.parse(event.body);
+    const body = JSON.parse(event.body);
+    console.log("📦 Body recebido:", body);
     
-    if (!process.env.GEMINI_API_KEY) {
-      return {
-        statusCode: 500,
-        body: JSON.stringify({ error: "GEMINI_API_KEY not configured" })
-      };
-    }
-
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-exp" });
-
-    let result;
-    let prompt = "";
-
-    if (action === "analyze") {
-      prompt = `Analise este código e retorne JSON com name, description, category, tags: ${codeSnippet.substring(0, 8000)}`;
-      result = await model.generateContent(prompt);
-    } else if (action === "reorganize") {
-      prompt = `Reorganize estas categorias de forma profissional: ${JSON.stringify(notebooks)}`;
-      result = await model.generateContent(prompt);
-    } else {
-      return { 
-        statusCode: 400, 
-        body: JSON.stringify({ error: "Ação desconhecida" }) 
-      };
-    }
-
-    const response = await result.response;
-    const text = response.text();
-
+    // Resposta de teste - retorna dados simulados
     return {
       statusCode: 200,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ response: text })
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*"
+      },
+      body: JSON.stringify({
+        response: JSON.stringify({
+          name: "Notebook de Teste",
+          description: "Este é um teste da função Netlify",
+          category: "Teste",
+          tags: ["teste", "funcionou"]
+        })
+      })
     };
   } catch (error) {
-    console.error("Gemini Function Error:", error);
+    console.error("❌ Erro:", error);
     return {
       statusCode: 500,
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ error: error.message })
     };
   }
