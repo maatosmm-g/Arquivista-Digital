@@ -1,4 +1,3 @@
-
 export interface NotebookAnalysis {
   name: string;
   description: string;
@@ -8,19 +7,31 @@ export interface NotebookAnalysis {
 
 export async function analyzeNotebookCode(codeSnippet: string): Promise<NotebookAnalysis> {
   try {
-    const response = await fetch('/api/analyze', {
+    // MUDANÇA AQUI: chamar a Netlify Function em vez de /api/analyze
+    const response = await fetch('/.netlify/functions/gemini', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ codeSnippet })
+      body: JSON.stringify({ 
+        action: 'analyze',
+        codeSnippet: codeSnippet.substring(0, 5000) 
+      })
     });
     
     if (!response.ok) {
-      const data = await response.json();
-      if (data.fallback) return data.fallback;
       throw new Error('Analysis failed');
     }
     
-    return await response.json();
+    const data = await response.json();
+    
+    // Se a resposta for um objeto com campo response, use ele
+    const result = data.response || data;
+    
+    return {
+      name: result.name || "Notebook sem nome",
+      description: result.description || "Não foi possível analisar o código automaticamente.",
+      category: result.category || "Geral",
+      tags: result.tags || []
+    };
   } catch (error) {
     console.error("Gemini Analysis Error:", error);
     return {
@@ -40,14 +51,21 @@ export interface BatchReorganizationUpdate {
 
 export async function reorganizeAllCategories(notebooks: { id: string, name: string, description: string, category: string }[]): Promise<BatchReorganizationUpdate[]> {
   try {
-    const response = await fetch('/api/reorganize', {
+    // MUDANÇA AQUI: chamar a Netlify Function
+    const response = await fetch('/.netlify/functions/gemini', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ notebooks })
+      body: JSON.stringify({ 
+        action: 'reorganize',
+        notebooks 
+      })
     });
 
     if (!response.ok) throw new Error('Reorganization failed');
-    return await response.json();
+    
+    const data = await response.json();
+    const result = data.response || data;
+    return Array.isArray(result) ? result : [];
   } catch (error) {
     console.error("Batch Reorganization Error:", error);
     return [];

@@ -1,53 +1,37 @@
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
 exports.handler = async (event) => {
-  // Função de teste - retorna sempre uma resposta de sucesso
-  console.log("📢 Função foi chamada!");
-  console.log("Método:", event.httpMethod);
-  console.log("Headers:", JSON.stringify(event.headers));
-  
-  if (event.httpMethod === "OPTIONS") {
-    return {
-      statusCode: 204,
-      headers: {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "Content-Type",
-        "Access-Control-Allow-Methods": "POST, OPTIONS"
-      }
-    };
-  }
-  
   if (event.httpMethod !== "POST") {
-    return {
-      statusCode: 405,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ error: "Método não permitido. Use POST." })
-    };
+    return { statusCode: 405, body: "Method Not Allowed" };
   }
 
   try {
-    const body = JSON.parse(event.body);
-    console.log("📦 Body recebido:", body);
+    const { codeSnippet } = JSON.parse(event.body);
+    const apiKey = process.env.GEMINI_API_KEY;
     
-    // Resposta de teste - retorna dados simulados
+    if (!apiKey) {
+      return { statusCode: 500, body: JSON.stringify({ error: "API Key faltando" }) };
+    }
+    
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    
+    const prompt = `Analise este código e retorne APENAS UM JSON válido com os campos: name, description, category, tags. Código: ${codeSnippet.substring(0, 5000)}`;
+    
+    const result = await model.generateContent(prompt);
+    const response = result.response;
+    const text = response.text();
+    
+    const cleaned = text.replace(/```json\n?/g, '').replace(/```\n?/g, '');
+    
     return {
       statusCode: 200,
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*"
-      },
-      body: JSON.stringify({
-        response: JSON.stringify({
-          name: "Notebook de Teste",
-          description: "Este é um teste da função Netlify",
-          category: "Teste",
-          tags: ["teste", "funcionou"]
-        })
-      })
+      headers: { "Content-Type": "application/json" },
+      body: cleaned
     };
   } catch (error) {
-    console.error("❌ Erro:", error);
     return {
       statusCode: 500,
-      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ error: error.message })
     };
   }
